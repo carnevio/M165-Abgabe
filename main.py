@@ -11,7 +11,7 @@ while True:
     databases = client.list_database_names()
     if not databases:
         print("No Database")
-        input("\nPress any button to return")
+        input("\nDrücke eine beliebige Taste, um zurückzukehren")
         continue
     print("Databases")
     for db in databases:
@@ -20,7 +20,7 @@ while True:
     while True:
         selected_db = input("\nSelect Database: ")
         if selected_db not in databases:
-            print("Database not found. Bitte erneut versuchen.")
+            print("Datenbank nicht gefunden. Bitte erneut versuchen.")
             continue
         break
 
@@ -31,7 +31,7 @@ while True:
     collections = db.list_collection_names()
     if not collections:
         print("No Collection")
-        input("\nPress any button to return")
+        input("\nDrücke eine beliebige Taste, um zurückzukehren")
         continue
     print("Collections")
     for col in collections:
@@ -50,7 +50,7 @@ while True:
     documents = list(collection.find())
     if not documents:
         print("No Document")
-        input("\nPress any button to return")
+        input("\nDrücke eine beliebige Taste, um zurückzukehren")
         continue
     print("Documents")
     doc_ids = [str(document['_id']) for document in documents]
@@ -58,14 +58,14 @@ while True:
         print(f" - {doc_id}")
 
     while True:
-        selected_doc = input("\nSelect Document (ID): ")
+        selected_doc = input("\nWähle das Document (ID) aus: ")
         try:
             doc_id_type = type(documents[0]['_id'])
             document = collection.find_one({'_id': doc_id_type(selected_doc)})
         except Exception:
             document = None
         if not document:
-            print("Document not found. Bitte erneut versuchen.")
+            print("Document nicht gefunden. Bitte erneut versuchen.")
             continue
         break
 
@@ -73,5 +73,5 @@ while True:
     for key, value in document.items():
         print(f"{key}: {value}")
 
-    input("\nPress any button to return")
+    input("\nDrücke eine beliebige Taste, um zurückzukehren")
     continue
