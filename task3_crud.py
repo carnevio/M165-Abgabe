@@ -52,11 +52,12 @@ def show_boroughs(collection) -> None:
 
 def show_top_restaurants(collection) -> None:
     pipeline = [
-        {"$match": {"score": {"$type": "number"}}},
+        {"$unwind": "$grades"},
+        {"$match": {"grades.score": {"$type": "number"}}},
         {
             "$group": {
                 "_id": "$name",
-                "avg_score": {"$avg": "$score"},
+                "avg_score": {"$avg": "$grades.score"},
                 "count": {"$sum": 1},
             }
         },
