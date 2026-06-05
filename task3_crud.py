@@ -1,5 +1,10 @@
-from __future__ import annotations
+from datetime import datetime
+import math
+import os
 
+from bson import ObjectId
+
+from db import get_client, get_database
 from datetime import datetime
 import math
 import os
@@ -19,7 +24,7 @@ def get_collection():
     return database[COLLECTION_NAME]
 
 
-def prompt_choice(prompt: str, allowed_values: list[str]) -> str:
+def prompt_choice(prompt, allowed_values):
     while True:
         value = input(prompt).strip()
         if value in allowed_values:
@@ -27,11 +32,12 @@ def prompt_choice(prompt: str, allowed_values: list[str]) -> str:
         print("Eingabe nicht gefunden. Bitte erneut versuchen.")
 
 
-def print_separator() -> None:
+def print_separator():
     print()
 
 
-def get_borough_values(collection) -> list[str]:
+def get_borough_values(collection):
+                                                   
     try:
         values = collection.distinct("borough")
         return sorted(value for value in values if value)
@@ -39,7 +45,8 @@ def get_borough_values(collection) -> list[str]:
         return []
 
 
-def show_boroughs(collection) -> None:
+def show_boroughs(collection):
+                                
     boroughs = get_borough_values(collection)
     if not boroughs:
         print("No Borough")
@@ -50,7 +57,10 @@ def show_boroughs(collection) -> None:
         print(f" - {borough}")
 
 
-def show_top_restaurants(collection) -> None:
+def show_top_restaurants(collection):
+                                                                                        
+                                                                          
+                                                                                      
     pipeline = [
         {"$unwind": "$grades"},
         {"$match": {"grades.score": {"$type": "number"}}},
@@ -78,28 +88,25 @@ def show_top_restaurants(collection) -> None:
         print(f"{index}. {name} - Durchschnitt: {avg_score:.2f} ({count} Einträge)")
 
 
-def extract_coordinates(document: dict) -> list[float] | None:
-    candidates = [
-        document.get("coordinates"),
-        document.get("coord"),
-        document.get("location", {}).get("coordinates") if isinstance(document.get("location"), dict) else None,
-        document.get("address", {}).get("coord") if isinstance(document.get("address"), dict) else None,
-        document.get("address", {}).get("coordinates") if isinstance(document.get("address"), dict) else None,
-    ]
-
-    for candidate in candidates:
-        if isinstance(candidate, (list, tuple)) and len(candidate) == 2:
-            try:
-                return [float(candidate[0]), float(candidate[1])]
-            except (TypeError, ValueError):
-                continue
+def extract_coordinates(document):
+                                                                                               
+    address = document.get("address")
+    if not isinstance(address, dict):
+        return None
+    coord = address.get("coord")
+    if isinstance(coord, list) and len(coord) == 2:
+        try:
+            return [float(coord[0]), float(coord[1])]
+        except (TypeError, ValueError):
+            return None
     return None
 
 
-def haversine_distance(coord_a: list[float], coord_b: list[float]) -> float:
+def haversine_distance(coord_a, coord_b):
+                                                                                         
     lon1, lat1 = coord_a
     lon2, lat2 = coord_b
-    radius = 6371.0
+    radius = 6371.0                           
 
     phi1 = math.radians(lat1)
     phi2 = math.radians(lat2)
@@ -111,11 +118,8 @@ def haversine_distance(coord_a: list[float], coord_b: list[float]) -> float:
     return radius * c
 
 
-def find_restaurant_by_name(collection, name: str) -> dict | None:
-    return collection.find_one({"name": {"$regex": f"^{name}$", "$options": "i"}})
-
-
-def find_nearest_to_le_perigord(collection) -> None:
+def find_nearest_to_le_perigord(collection):
+                                                                                   
     reference = collection.find_one({"name": {"$regex": "^Le Perigord$", "$options": "i"}})
     if not reference:
         print("Le Perigord nicht gefunden.")
@@ -129,6 +133,7 @@ def find_nearest_to_le_perigord(collection) -> None:
     nearest_restaurant = None
     nearest_distance = None
 
+                                                    
     for restaurant in collection.find({"_id": {"$ne": reference["_id"]}}):
         coordinates = extract_coordinates(restaurant)
         if not coordinates:
@@ -148,27 +153,18 @@ def find_nearest_to_le_perigord(collection) -> None:
     print(f"Distance to Le Perigord: {nearest_distance:.3f} km")
 
 
-def build_search_query(name: str, cuisine: str) -> dict:
-    query: dict[str, object] = {}
-    conditions = []
-
-    if name:
-        conditions.append({"name": {"$regex": name, "$options": "i"}})
-    if cuisine:
-        conditions.append({"cuisine": {"$regex": cuisine, "$options": "i"}})
-
-    if not conditions:
-        return query
-    if len(conditions) == 1:
-        return conditions[0]
-    return {"$and": conditions}
-
-
-def search_restaurants(collection) -> list[dict]:
+def search_restaurants(collection):
+                                                 
     name = input("Name (leer lassen, um zu ignorieren): ").strip()
     cuisine = input("Küche (leer lassen, um zu ignorieren): ").strip()
 
-    query = build_search_query(name, cuisine)
+                              
+    query = {}
+    if name:
+        query["name"] = {"$regex": name, "$options": "i"}
+    if cuisine:
+        query["cuisine"] = {"$regex": cuisine, "$options": "i"}
+
     results = list(collection.find(query))
 
     if not results:
@@ -185,7 +181,7 @@ def search_restaurants(collection) -> list[dict]:
     return results
 
 
-def choose_restaurant(collection, results: list[dict]) -> dict | None:
+def choose_restaurant(collection, results):
     if not results:
         return None
 
@@ -205,7 +201,8 @@ def choose_restaurant(collection, results: list[dict]) -> dict | None:
         return None
 
 
-def add_rating(collection) -> None:
+def add_rating(collection):
+                                           
     results = search_restaurants(collection)
     if not results:
         return
@@ -223,11 +220,13 @@ def add_rating(collection) -> None:
         except ValueError:
             print("Bitte eine Zahl eingeben.")
 
+                                        
     rating_entry = {
         "date": datetime.now(),
         "score": score,
     }
 
+                                          
     collection.update_one(
         {"_id": selected_restaurant["_id"]},
         {"$push": {"grades": rating_entry}},
@@ -235,7 +234,7 @@ def add_rating(collection) -> None:
     print("Bewertung gespeichert.")
 
 
-def menu() -> None:
+def menu():
     collection = get_collection()
 
     while True:
@@ -266,7 +265,7 @@ def menu() -> None:
             print("Ungültige Auswahl.")
 
 
-def main() -> None:
+def main():
     menu()
 
 

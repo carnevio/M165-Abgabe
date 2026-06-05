@@ -1,23 +1,27 @@
-from __future__ import annotations
-
-from dataclasses import dataclass, field
-
-
-@dataclass
 class Joke:
-    text: str
-    category: list[str] = field(default_factory=list)
-    author: str = ""
+    def __init__(self, text, category=None, author=""):
+        """
+        Klasse fuer einen Witz. (Aufgabe 6.2.1)
+        """
+        self.text = text
+        self.category = category if category is not None else []
+        self.author = author
 
-    def to_document(self) -> dict:
+    def to_document(self):
+        """
+        Konvertiert das Witz-Objekt in ein MongoDB-Dokument.
+        """
         return {
             "text": self.text,
-            "category": list(self.category),
+            "category": self.category,
             "author": self.author,
         }
 
     @classmethod
-    def from_document(cls, document: dict) -> "Joke":
+    def from_document(cls, document):
+        """
+        Erstellt ein Witz-Objekt aus einem MongoDB-Dokument.
+        """
         categories = document.get("category", [])
         if not isinstance(categories, list):
             categories = [str(categories)]
@@ -27,3 +31,4 @@ class Joke:
             category=[str(item) for item in categories],
             author=str(document.get("author", "")),
         )
+

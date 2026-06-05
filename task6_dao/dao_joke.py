@@ -1,49 +1,49 @@
-from __future__ import annotations
-
 import argparse
 import os
 import sys
 from pathlib import Path
 
 from bson import ObjectId
-from pymongo.collection import Collection
 
 from joke import Joke
 
+                                                                           
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 from db import get_client, get_database
 
-
 class DaoJoke:
-    def __init__(self, collection: Collection):
+    """
+    Data Access Object (DAO) fuer Witze. (Aufgabe 6.2.2)
+    """
+    def __init__(self, collection):
         self.collection = collection
 
     @classmethod
-    def from_database(
-        cls,
-        database_name: str | None = None,
-        collection_name: str = "jokes",
-    ) -> "DaoJoke":
+    def from_database(cls, database_name=None, collection_name="jokes"):
         client = get_client()
         database = get_database(client=client, database_name=database_name or os.getenv("MONGODB_DB", "m165"))
         return cls(database[collection_name])
 
-    def insert(self, joke: Joke) -> ObjectId:
+    def insert(self, joke):
+                                                     
         result = self.collection.insert_one(joke.to_document())
         return result.inserted_id
 
-    def get_category(self, category: str) -> list[dict]:
+    def get_category(self, category):
+                                                                                              
         query = {
             "category": {
-                "$elemMatch": {"$regex": category, "$options": "i"},
+                "$regex": category,
+                "$options": "i"
             }
         }
         return list(self.collection.find(query))
 
-    def delete(self, joke_id: str) -> bool:
+    def delete(self, joke_id):
+                                              
         try:
             object_id = ObjectId(joke_id)
         except Exception:
@@ -52,8 +52,8 @@ class DaoJoke:
         result = self.collection.delete_one({"_id": object_id})
         return result.deleted_count == 1
 
-
-def build_parser() -> argparse.ArgumentParser:
+def build_parser():
+                                                       
     parser = argparse.ArgumentParser(description="Kleines CLI fuer DaoJoke")
     subparsers = parser.add_subparsers(dest="command")
 
@@ -70,8 +70,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     return parser
 
-
-def main() -> None:
+def main():
     args = build_parser().parse_args()
     dao = DaoJoke.from_database()
 
@@ -92,6 +91,6 @@ def main() -> None:
     else:
         print("Waehle einen Befehl: insert | get-category | delete")
 
-
 if __name__ == "__main__":
     main()
+

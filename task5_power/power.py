@@ -1,36 +1,48 @@
-from __future__ import annotations
-
-from dataclasses import dataclass
 from datetime import datetime
-
 import psutil
 
-
-@dataclass
 class Power:
-    cpu: float | None = None
-    ram_total: int | None = None
-    ram_used: int | None = None
-    timestamp: datetime | None = None
-
-    def __post_init__(self) -> None:
-        if self.cpu is None:
+    def __init__(self, cpu=None, ram_total=None, ram_used=None, timestamp=None):
+        """
+        Klasse zur Speicherung der CPU- und RAM-Auslastung.
+        Falls keine Werte uebergeben werden, werden die aktuellen Werte ermittelt.
+        """
+                                                                    
+        if cpu is None:
             self.cpu = float(psutil.cpu_percent(interval=None))
+        else:
+            self.cpu = float(cpu)
 
-        if self.ram_total is None or self.ram_used is None:
+                                                                           
+        if ram_total is None or ram_used is None:
             memory = psutil.virtual_memory()
-            if self.ram_total is None:
+            if ram_total is None:
                 self.ram_total = int(memory.total)
-            if self.ram_used is None:
+            else:
+                self.ram_total = int(ram_total)
+            
+            if ram_used is None:
                 self.ram_used = int(memory.used)
+            else:
+                self.ram_used = int(ram_used)
+        else:
+            self.ram_total = int(ram_total)
+            self.ram_used = int(ram_used)
 
-        if self.timestamp is None:
+                                                              
+        if timestamp is None:
             self.timestamp = datetime.now()
+        else:
+            self.timestamp = timestamp
 
-    def to_document(self) -> dict:
+    def to_document(self):
+        """
+        Konvertiert das Objekt in ein Dictionary fuer MongoDB.
+        """
         return {
-            "cpu": float(self.cpu),
-            "ram_total": int(self.ram_total),
-            "ram_used": int(self.ram_used),
+            "cpu": self.cpu,
+            "ram_total": self.ram_total,
+            "ram_used": self.ram_used,
             "timestamp": self.timestamp,
         }
+

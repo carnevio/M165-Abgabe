@@ -1,22 +1,22 @@
-from __future__ import annotations
-
 from bson import ObjectId
-
 from db import get_client
 
-
-def prompt_for_choice(prompt: str, allowed_values: list[str]) -> str:
+def prompt_for_choice(prompt, allowed_values):
+    """
+    Fragt den Benutzer nach einer Eingabe, bis ein gültiger Wert eingegeben wird.
+    """
     while True:
-        value = input(prompt)
+        value = input(prompt).strip()
         if value in allowed_values:
             return value
         print("Eingabe nicht gefunden. Bitte erneut versuchen.")
 
-
-def main() -> None:
+def main():
+                                                
     client = get_client()
 
     while True:
+                                  
         databases = client.list_database_names()
         if not databases:
             print("No Database")
@@ -30,6 +30,7 @@ def main() -> None:
         selected_database = prompt_for_choice("\nSelect Database: ", databases)
         database = client[selected_database]
 
+                                  
         print(f"\n{selected_database}\n")
         collections = database.list_collection_names()
         if not collections:
@@ -44,6 +45,7 @@ def main() -> None:
         selected_collection = prompt_for_choice("\nSelect Collection: ", collections)
         collection = database[selected_collection]
 
+                                      
         print(f"\n{selected_database}.{selected_collection}")
         documents = list(collection.find())
         if not documents:
@@ -52,17 +54,20 @@ def main() -> None:
             continue
 
         print("Documents")
-        document_ids = [str(document["_id"]) for document in documents]
+        document_ids = [str(doc["_id"]) for doc in documents]
         for document_id in document_ids:
             print(f" - {document_id}")
 
         selected_document = prompt_for_choice("\nSelect Document: ", document_ids)
 
+                                                    
         document = None
         try:
+                                                           
             object_id = ObjectId(selected_document)
             document = collection.find_one({"_id": object_id})
         except Exception:
+                                                                                            
             for candidate in documents:
                 if str(candidate["_id"]) == selected_document:
                     document = candidate
@@ -72,12 +77,12 @@ def main() -> None:
             print("Document nicht gefunden. Bitte erneut versuchen.")
             continue
 
+                                       
         print(f"\n{selected_database}.{selected_collection}.{selected_document}\n")
         for key, value in document.items():
             print(f"{key}: {value}")
 
         input("\nPress any button to return")
-
 
 if __name__ == "__main__":
     main()
