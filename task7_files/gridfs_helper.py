@@ -11,10 +11,7 @@ if str(PROJECT_ROOT) not in sys.path:
 from db import get_client, get_database
 
 class GridFSHelper:
-    """
-    Ein wiederverwendbarer Helper für MongoDB GridFS-Operationen (Aufgabe 7).
-    Bietet Methoden zum Hochladen, Herunterladen und Suchen von Dateien.
-    """
+    
     def __init__(self, db=None):
         if db is None:
             self.db = get_database()
@@ -23,9 +20,7 @@ class GridFSHelper:
         self.fs = gridfs.GridFS(self.db)
 
     def upload_file(self, file_path, filename=None, album_name=None):
-        """
-        Lädt eine lokale Datei in GridFS hoch und speichert Album-Metadaten.
-        """
+        
         path = Path(file_path)
         if not path.is_file():
             raise FileNotFoundError(f"Die Datei {file_path} wurde nicht gefunden.")
@@ -46,9 +41,7 @@ class GridFSHelper:
         return file_id
 
     def download_file_by_id(self, file_id, target_path):
-        """
-        Lädt ein File anhand seiner ID aus GridFS herunter und speichert es lokal.
-        """
+        
         if isinstance(file_id, str):
             file_id = ObjectId(file_id)
 
@@ -65,24 +58,18 @@ class GridFSHelper:
         return target_file_path
 
     def get_files_by_album(self, album_name):
-        """
-        Gibt alle Dokumente (Dateien) zurück, die zu einem bestimmten Album gehören.
-        """
+        
         query = {"metadata.album": album_name}
         return list(self.fs.find(query))
 
     def get_all_albums(self):
-        """
-        Gibt eine Liste aller eindeutigen Albumnamen zurück.
-        """
+        
         files_collection = self.db["fs.files"]
         albums = files_collection.distinct("metadata.album")
         return [album for album in albums if album]
 
     def delete_file_by_id(self, file_id):
-        """
-        Löscht ein File aus GridFS anhand seiner ID.
-        """
+        
         if isinstance(file_id, str):
             file_id = ObjectId(file_id)
         

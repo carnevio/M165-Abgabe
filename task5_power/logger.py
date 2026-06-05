@@ -28,9 +28,6 @@ def trim_to_max_logs(collection, max_logs):
     return result.deleted_count
 
 def log_loop(collection, interval_seconds, max_logs):
-    """
-    Hauptschleife des Loggers. Loggt im angegebenen Intervall. (Aufgabe 5.2)
-    """
                                                 
     collection.create_index("timestamp")
 

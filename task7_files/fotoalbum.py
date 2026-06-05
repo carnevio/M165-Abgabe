@@ -11,7 +11,7 @@ from task7_files.gridfs_helper import GridFSHelper
 
 def print_banner():
     print("=" * 60)
-    print("              📸  FOTOALBUM MANAGER CLI  📸")
+    print("                FOTOALBUM MANAGER CLI  ")
     print("=" * 60)
 
 def prompt_choice(prompt, allowed_values):

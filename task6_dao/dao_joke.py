@@ -15,9 +15,7 @@ if str(PROJECT_ROOT) not in sys.path:
 from db import get_client, get_database
 
 class DaoJoke:
-    """
-    Data Access Object (DAO) fuer Witze. (Aufgabe 6.2.2)
-    """
+    
     def __init__(self, collection):
         self.collection = collection
 

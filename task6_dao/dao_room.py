@@ -21,9 +21,7 @@ class Room:
         self.building = building
 
     def to_document(self):
-        """
-        Konvertiert das Raum-Objekt in ein MongoDB-Dokument.
-        """
+        
         return {
             "name": self.name,
             "seats": self.seats,

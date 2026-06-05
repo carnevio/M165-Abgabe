@@ -3,10 +3,6 @@ import psutil
 
 class Power:
     def __init__(self, cpu=None, ram_total=None, ram_used=None, timestamp=None):
-        """
-        Klasse zur Speicherung der CPU- und RAM-Auslastung.
-        Falls keine Werte uebergeben werden, werden die aktuellen Werte ermittelt.
-        """
                                                                     
         if cpu is None:
             self.cpu = float(psutil.cpu_percent(interval=None))
@@ -36,9 +32,6 @@ class Power:
             self.timestamp = timestamp
 
     def to_document(self):
-        """
-        Konvertiert das Objekt in ein Dictionary fuer MongoDB.
-        """
         return {
             "cpu": self.cpu,
             "ram_total": self.ram_total,

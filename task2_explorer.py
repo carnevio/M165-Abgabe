@@ -2,9 +2,7 @@ from bson import ObjectId
 from db import get_client
 
 def prompt_for_choice(prompt, allowed_values):
-    """
-    Fragt den Benutzer nach einer Eingabe, bis ein gültiger Wert eingegeben wird.
-    """
+    
     while True:
         value = input(prompt).strip()
         if value in allowed_values:
